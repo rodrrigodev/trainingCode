@@ -2,8 +2,7 @@ const readDatabase = require('../src/utils/readDatabase')
 const products = readDatabase('products')
 const formatPrice = require('../src/utils/formatPrice')
 const edit = require('../src/utils/edit')
-const fs = require('fs')
-const path = require('path')
+const deleteProduct = require('../src/utils/deleteProduct')
 
 const productsController = {
     index: (req, res)=>{
@@ -15,7 +14,6 @@ const productsController = {
 
         res.render('detail', {productFound, formatPrice})
     },
-    
     edit: (req, res)=>{
         const {id} = req.params
         const productFound = products.find((product=>{ return product.id === Number(id)}))
@@ -25,7 +23,6 @@ const productsController = {
         const {id} = req.params
         const productFound = products.find((product=>{ return product.id === Number(id)}))
         const {name, price, discount, category, description} = req.body
-
         const edited = {
             id: productFound.id,
             name: name,
@@ -35,18 +32,20 @@ const productsController = {
             description: description,
             image: productFound.image
         }
-
-        // edit(productFound, products, edited)
-        const productsWithEdited = [...products, edited]
-        const productsJSON = JSON.stringify(productsWithEdited, null, ' ')
-        const pathProducts = path.join(__dirname, '..', 'src', 'database', 'products.json')
-        fs.writeFileSync(pathProducts, productsJSON)
-        res.send('Deu certo')
+        edit(products, edited)
+        res.redirect('/products')
+    },
+    delete: (req, res)=>{
+        const {id} = req.params
+        deleteProduct(id, products)
+        res.redirect('/products')
+    },
+    create: (req, res)=>{
+        res.render('product-create-form')
+    },
+    save: (req, res)=>{
+        
     }
     }
-
-
-
-
 
 module.exports = productsController
